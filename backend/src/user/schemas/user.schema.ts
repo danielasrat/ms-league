@@ -38,9 +38,11 @@ export class User {
   @Prop()
   paymentMethod?: string;
 
+  @Prop({ default: 'pending' })
+  paymentStatus: string;
+
   @Prop()
   lastUpdated?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
-

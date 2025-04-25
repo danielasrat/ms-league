@@ -14,7 +14,6 @@ import { MailModule } from '../mail/mail.module';
   ],
   controllers: [UserController],
   providers: [UserService],
-  exports: [UserService], // Optional: in case you need to use UserService elsewhere
+  exports: [UserService, MongooseModule], // Optional: in case you need to use UserService elsewhere
 })
 export class UserModule {}
-

@@ -10,6 +10,8 @@ import { ForumModule } from './forum/forum.module';
 import { MembershipTask } from './tasks/membership.task';
 import { TasksModule } from './tasks/tasks.module';
 import { EventRegistrationModule } from './event-registration/event-registration.module';
+import { PaymentModule } from './payment/payment.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -23,6 +25,10 @@ import { EventRegistrationModule } from './event-registration/event-registration
     ForumModule,
     TasksModule,
     EventRegistrationModule,
+    PaymentModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
   ],
 })
 export class AppModule {}
