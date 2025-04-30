@@ -19,6 +19,9 @@ export class UserService {
     private readonly jwtService: JwtService,
   ) {}
 
+  async findById(id: string) {
+    return this.userModel.findById(id);
+  }
   async login(email: string, password: string) {
     const user = await this.userModel.findOne({ email });
     console.log('Login attempt with email:', user);

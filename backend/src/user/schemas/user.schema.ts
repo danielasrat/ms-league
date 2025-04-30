@@ -43,6 +43,7 @@ export class User {
 
   @Prop()
   lastUpdated?: Date;
+  paymentProof?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

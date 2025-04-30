@@ -53,29 +53,47 @@ export class PaymentService {
     return response.data;
   }
 
-  async saveTelebirrScreenshot(email: string, filename: string) {
-    await this.paymentModel.create({
-      email,
-      amount: '200',
-      method: 'telebirr',
-      screenshot: filename,
-      status: 'pending',
-    });
+  async getPaymentByUserId(userId: string) {
+    // 1. Find user first
+    const user = await this.userModel.findById(userId).lean().exec();
+    if (!user) {
+      console.log(`[DEBUG] User ${userId} not found`);
+      return null;
+    }
 
-    return {
-      message: 'Screenshot uploaded successfully. Awaiting admin approval.',
-    };
+    // 2. Find most recent payment
+    return this.paymentModel
+      .findOne({ email: user.email })
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
   }
 
-  async getTelebirrInstructions(email: string) {
-    return {
-      message: 'Please transfer 200 ETB to the following account.',
-      merchant: 'MS-League',
-      short_code: '123456',
-      account_number: '0987654321',
-      instructions:
-        'After payment, upload your screenshot to /payment/telebirr/upload.',
-    };
+  async saveTelebirrScreenshot(email: string, filename: string) {
+    try {
+      // Delete any existing pending payments for this email
+      await this.paymentModel
+        .deleteMany({
+          email,
+          status: 'pending',
+          method: 'telebirr',
+        })
+        .exec();
+
+      // Create new payment record
+      const payment = await this.paymentModel.create({
+        email,
+        amount: '200',
+        method: 'telebirr',
+        screenshot: filename,
+        status: 'pending',
+      });
+
+      return payment;
+    } catch (error) {
+      console.error('Error saving payment:', error);
+      throw error;
+    }
   }
 
   async extendMembership(email: string) {
