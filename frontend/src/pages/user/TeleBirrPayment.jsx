@@ -22,16 +22,59 @@ export default function TelebirrPayment() {
 
     try {
       const user = JSON.parse(localStorage.getItem("user"));
+      if (!user?.email) {
+        throw new Error("User information not found");
+      }
       formData.append("email", user.email);
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Authentication token missing");
+      }
 
       const response = await axios.post(
         "http://localhost:3000/payment/telebirr/upload",
         formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+          timeout: 30000, // 30 seconds timeout
+        }
       );
-      setMessage("✅ Screenshot uploaded successfully. Awaiting approval.");
+
+      if (response.data?.message) {
+        setMessage(`✅ ${response.data.message}`);
+      } else {
+        setMessage("✅ Screenshot uploaded successfully. Awaiting approval.");
+      }
+
+      // Clear the file input after successful upload
+      setScreenshot(null);
+      if (e.target.reset) e.target.reset();
     } catch (err) {
-      setMessage("❌ Failed to upload screenshot. Please try again.");
+      console.error("Upload error:", err);
+
+      let errorMessage = "❌ Failed to upload screenshot. Please try again.";
+
+      if (err.response) {
+        // Server responded with error status
+        if (err.response.data?.message) {
+          errorMessage = `❌ ${err.response.data.message}`;
+        } else if (err.response.status === 413) {
+          errorMessage = "❌ File too large (max 5MB allowed)";
+        } else if (err.response.status === 401) {
+          errorMessage = "❌ Session expired. Please login again.";
+        }
+      } else if (err.request) {
+        // Request was made but no response
+        errorMessage = "❌ Server not responding. Try again later.";
+      } else if (err.message.includes("timeout")) {
+        errorMessage = "❌ Upload timed out. Try again.";
+      }
+
+      setMessage(errorMessage);
     }
   };
 
