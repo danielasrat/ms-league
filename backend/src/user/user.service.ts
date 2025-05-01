@@ -62,7 +62,11 @@ export class UserService {
       { new: true },
     );
     if (user) {
-      await this.mailService.sendApprovalEmail(user.email);
+      try {
+        await this.mailService.sendApprovalEmail(user.email);
+      } catch (error) {
+        console.error('Email sending failed:', error.message);
+      }
     }
     return user;
   }
@@ -74,7 +78,11 @@ export class UserService {
       { new: true },
     );
     if (user) {
-      await this.mailService.sendRejectionEmail(user.email);
+      try {
+        await this.mailService.sendApprovalEmail(user.email);
+      } catch (error) {
+        console.error('Email sending failed:', error.message);
+      }
     }
     return user;
   }
